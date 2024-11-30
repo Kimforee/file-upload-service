@@ -6,13 +6,6 @@ const app = express();
 const fs = require('fs');
 const fileType = require('file-type');
 
-const fileStream = fs.createReadStream(filePath);
-fileStream.on('error', (err) => {
-    console.error(err);
-    res.status(500).json({ error: 'Error occurred while reading the file' });
-});
-fileStream.pipe(res);
-
 // Set up multer for file uploads
 const upload = multer({
     dest: 'uploads/',
@@ -128,11 +121,9 @@ app.delete('/delete/:id', async (req, res) => {
         // Delete the file from the server
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath); // Remove file
-        } else {
-            console.warn('File not found on server, only deleting metadata.');
         }
 
-        // Delete the metadata from the database
+        // Delete metadata from the database
         const deleteQuery = 'DELETE FROM file_metadata WHERE id = $1';
         await pool.query(deleteQuery, [fileId]);
 
@@ -141,7 +132,7 @@ app.delete('/delete/:id', async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Error occurred while deleting the file' });
     }
-});
+})
 
 // Start the server
 const PORT = process.env.PORT || 3000;
